@@ -7,11 +7,11 @@
     }
   ],
   "require": {
-    "repo/project-name": "dev-master"
+
   },
   "autoload": {
     "psr-4": {
-      "salesinteract\\": "src/phpunionplatform"
+      "phpunionplatform\\": "src/phpunionplatform"
     }
   }
 }
