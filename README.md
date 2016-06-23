@@ -1,2 +1,2 @@
-# phpunion
-A PHP Client library for the unionframework
+# php-unionplatform
+A PHP Client library for the UnionPlatform

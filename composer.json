@@ -1,0 +1,17 @@
+{
+  "name": "dotready/php-unionplatform",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/dotready/php-unionplatform"
+    }
+  ],
+  "require": {
+    "repo/project-name": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "salesinteract\\": "src/phpunionplatform"
+    }
+  }
+}
