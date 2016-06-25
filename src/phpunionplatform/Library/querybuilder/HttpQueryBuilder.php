@@ -6,7 +6,7 @@
  * Time: 17:11
  */
 
-namespace phpunionplatform\library\QueryBuilder;
+namespace phpunionplatform\library\querybuilder;
 
 use phpunionplatform\exception\PhpunionplatformException;
 
@@ -36,8 +36,10 @@ class HttpQueryBuilder
 
         $data = array('mode' => $mode);
 
-        foreach ($params as $key => $param) {
-            $data[$key] = $param;
+        if (!empty($params)) {
+            foreach ($params as $key => $param) {
+                $data[$key] = $param;
+            }
         }
 
         return http_build_query($data);

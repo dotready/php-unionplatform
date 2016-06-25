@@ -2,31 +2,32 @@
 
 require "vendor/autoload.php";
 
-use phpunionplatform\Service\UnionplatformService;
+use phpunionplatform\service\Unionplatform;
+use phpunionplatform\library\client\HttpsClient;
 
-$unionService = new UnionplatformService('https://yourdomain.com', 9200);
+$host = 'ipaddr';
+$port = 80;
+$domain = 'yourdomain.com';
 
-// connect, shake hands and say hello
-echo $unionService->sayHello();
-exit;
-/*
+$room = 'awesomeRoomName';
 
-$httpService->buildHttpQuery('d', array(
-    'data' => utf8_encode($upc)
+// create new http interface
+$httpClient = new HttpsClient($host, $port, $domain);
+
+// create
+$unionplatformService = new Unionplatform(
+    $httpClient
 );
 
-function poll($sessionId)
-{
-    $int = 1;
-    return send('mode=c&sid=' . $sessionId . '&rid='.$int);
-}
+// connect, shake hands and say hello
+$unionplatformService->sayHello();
 
+// create a room
+$unionplatformService->createRoom($room);
 
+// join it
+$unionplatformService->joinRoom($room);
 
-
-$msg = send(build($handshake, 'd'));
-$sessionId = $msg->U->L->A[1];
-
-poll($sessionId);
-
-send(build($message));*/
+// send a room message, if the userid is set it will send only to that user
+// the last two parameters (userId, params[]) are optional
+$unionplatformService->sendMessage($room, 'NOTIFY', '', array('hello my friend!'));
