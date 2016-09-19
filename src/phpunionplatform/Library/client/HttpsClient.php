@@ -43,6 +43,10 @@ class HttpsClient implements HttpClientInterface
     {
         $socket = stream_socket_client("tcp://".$this->host.":" . $this->port, $errno, $errstr, 15);
 
+        if (empty($socket)) {
+            throw new PhpunionplatformException('Connection timeout');
+        }
+        
         stream_set_blocking($socket, true);
         stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         stream_set_blocking($socket, false);
