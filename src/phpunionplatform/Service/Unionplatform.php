@@ -2,7 +2,7 @@
 
 namespace phpunionplatform\Service;
 
-use phpunionplatform\exception\PhpunionplatformException;
+use phpunionplatform\Exception\PhpunionplatformException;
 use phpunionplatform\Library\client\HttpClientInterface;
 use phpunionplatform\Library\querybuilder\HttpQueryBuilder;
 use phpunionplatform\Library\upcbuilder\UpcBuilder;
