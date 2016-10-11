@@ -46,7 +46,7 @@ class HttpsClient implements HttpClientInterface
         if (empty($socket)) {
             throw new PhpunionplatformException('Connection timeout');
         }
-        
+
         stream_set_blocking($socket, true);
         stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         stream_set_blocking($socket, false);

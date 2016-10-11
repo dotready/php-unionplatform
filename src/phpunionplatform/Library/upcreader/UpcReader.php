@@ -1,6 +1,6 @@
 <?php
 
-namespace phpunionplatform\library\upcreader;
+namespace phpunionplatform\Library\upcreader;
 
 class UpcReader
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace phpunionplatform\exception;
+namespace phpunionplatform\Exception;
 
 class PhpunionplatformException extends \Exception
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace phpunionplatform\library\upcbuilder;
+namespace phpunionplatform\Library\upcbuilder;
 
 class UpcBuilder
 {

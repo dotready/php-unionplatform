@@ -6,7 +6,7 @@
  * Time: 17:11
  */
 
-namespace phpunionplatform\library\querybuilder;
+namespace phpunionplatform\Library\querybuilder;
 
 use phpunionplatform\exception\PhpunionplatformException;
 

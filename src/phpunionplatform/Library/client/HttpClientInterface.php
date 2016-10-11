@@ -1,6 +1,6 @@
 <?php
 
-namespace phpunionplatform\library\client;
+namespace phpunionplatform\Library\client;
 
 interface HttpClientInterface
 {

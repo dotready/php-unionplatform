@@ -1,12 +1,12 @@
 <?php
 
-namespace phpunionplatform\service;
+namespace phpunionplatform\Service;
 
 use phpunionplatform\exception\PhpunionplatformException;
-use phpunionplatform\library\client\HttpClientInterface;
-use phpunionplatform\library\querybuilder\HttpQueryBuilder;
-use phpunionplatform\library\upcbuilder\UpcBuilder;
-use phpunionplatform\library\upcreader\UpcReader;
+use phpunionplatform\Library\client\HttpClientInterface;
+use phpunionplatform\Library\querybuilder\HttpQueryBuilder;
+use phpunionplatform\Library\upcbuilder\UpcBuilder;
+use phpunionplatform\Library\upcreader\UpcReader;
 
 class Unionplatform
 {
