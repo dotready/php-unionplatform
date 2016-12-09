@@ -4,7 +4,9 @@ namespace phpunionplatform\Library\upcreader;
 
 class UpcReader
 {
-    public function __construct() { }
+    public function __construct()
+    {
+    }
 
     /**
      * @param $serverUpc

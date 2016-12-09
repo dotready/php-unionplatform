@@ -42,7 +42,9 @@ class Unionplatform
     public function sayHello()
     {
         // client handshake
-        $upc = $this->upcBuilder->buildUpc(65, array(
+        $upc = $this->upcBuilder->buildUpc(
+            65,
+            array(
                 'Orbiter',
                 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0;2.1.1 (Build 856)',
                 '1.10.3'
@@ -50,7 +52,9 @@ class Unionplatform
         );
 
         // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery('d', array(
+        $data = $this->querybuilder->buildHttpQuery(
+            'd',
+            array(
                 'data' => utf8_encode($upc)
             )
         );
@@ -87,13 +91,17 @@ class Unionplatform
     public function createRoom($roomId)
     {
         // build the upc request
-        $upc = $this->upcBuilder->buildUpc(24, array(
+        $upc = $this->upcBuilder->buildUpc(
+            24,
+            array(
                 $roomId
             )
         );
 
         // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery('s', array(
+        $data = $this->querybuilder->buildHttpQuery(
+            's',
+            array(
                 'rid' => $this->getRequestNumber(),
                 'sid' => $this->sessionId,
                 'data' => $upc
@@ -118,13 +126,17 @@ class Unionplatform
     public function joinRoom($roomId, $password = '')
     {
         // client handshake
-        $upc = $this->upcBuilder->buildUpc(4, array(
+        $upc = $this->upcBuilder->buildUpc(
+            4,
+            array(
                 $roomId
             )
         );
 
         // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery('s', array(
+        $data = $this->querybuilder->buildHttpQuery(
+            's',
+            array(
                 'rid' => $this->getRequestNumber(),
                 'sid' => $this->sessionId,
                 'data' => $upc
@@ -155,7 +167,8 @@ class Unionplatform
 
         if (!empty($userId)) {
             // prepare the filter
-            $filter = simplexml_load_string('<f t="A"><a c="eq"><n><![CDATA[userId]]></n><v><![CDATA[' . (int)$userId . ']]></v></a></f>');
+            $xml = '<f t="A"><a c="eq"><n><![CDATA[userId]]></n><v><![CDATA[' . $userId . ']]></v></a></f>';
+            $filter = simplexml_load_string($xml);
         }
 
         // set the upc param
@@ -168,7 +181,9 @@ class Unionplatform
         $upc = $this->upcBuilder->buildUpc(1, $upcParams);
 
         // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery('s', array(
+        $data = $this->querybuilder->buildHttpQuery(
+            's',
+            array(
                 'rid' => $this->getRequestNumber(),
                 'sid' => $this->sessionId,
                 'data' => $upc
@@ -194,7 +209,9 @@ class Unionplatform
         }
 
         // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery('c', array(
+        $data = $this->querybuilder->buildHttpQuery(
+            'c',
+            array(
                 'rid' => $this->getRequestNumber(),
                 'sid' => $this->sessionId
             )
