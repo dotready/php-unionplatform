@@ -1,8 +1,8 @@
 <?php
 
-namespace phpunionplatform\Library\client;
+namespace phpunionplatform\Library\Client;
 
-use phpunionplatform\exception\PhpunionplatformException;
+use phpunionplatform\Exception\PhpunionplatformException;
 
 class HttpsClient implements HttpClientInterface
 {

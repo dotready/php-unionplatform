@@ -6,9 +6,9 @@
  * Time: 17:11
  */
 
-namespace phpunionplatform\Library\querybuilder;
+namespace phpunionplatform\Library\Querybuilder;
 
-use phpunionplatform\exception\PhpunionplatformException;
+use phpunionplatform\Exception\PhpunionplatformException;
 
 class HttpQueryBuilder
 {
@@ -20,7 +20,9 @@ class HttpQueryBuilder
     /**
      * HttpQueryBuilder constructor.
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /**
      * @param $mode

@@ -3,10 +3,13 @@
 namespace phpunionplatform\Service;
 
 use phpunionplatform\Exception\PhpunionplatformException;
-use phpunionplatform\Library\client\HttpClientInterface;
-use phpunionplatform\Library\querybuilder\HttpQueryBuilder;
-use phpunionplatform\Library\upcbuilder\UpcBuilder;
-use phpunionplatform\Library\upcreader\UpcReader;
+use phpunionplatform\Library\Client\HttpClientInterface;
+use phpunionplatform\Library\Querybuilder\HttpQueryBuilder;
+use phpunionplatform\Library\Enum\UpcHttpRequestMode;
+use phpunionplatform\Library\Enum\UpcHttpRequestParam;
+use phpunionplatform\Library\Enum\UpcMessageId;
+use phpunionplatform\Library\Upcbuilder\UpcBuilder;
+use phpunionplatform\Library\Upcreader\UpcReader;
 
 class Unionplatform
 {
@@ -26,7 +29,7 @@ class Unionplatform
      */
     public function __construct(HttpClientInterface $client)
     {
-        $this->upcBuilder = new UpcBuilder();
+       // $this->upcBuilder = new UpcBuilder();
         $this->upcReader = new UpcReader();
         $this->httpClient = $client;
         $this->querybuilder = new HttpQueryBuilder();
@@ -41,21 +44,21 @@ class Unionplatform
      */
     public function sayHello()
     {
-        // client handshake
-        $upc = $this->upcBuilder->buildUpc(
-            65,
-            array(
-                'Orbiter',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0;2.1.1 (Build 856)',
-                '1.10.3'
-            )
-        );
+        $userAgent = ''
+            . 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0)'
+            . 'Gecko/20100101 Firefox/47.0;2.1.1 (Build 856)';
+
+        $upc = new UpcBuilder(UpcMessageId::MESSAGE_ID_CLIENT_HELLO);
+
+        $upc->addArgument('Orbiter');
+        $upc->addArgument($userAgent);
+        $upc->addArgument('1.10.3');
 
         // create a postfield query string
         $data = $this->querybuilder->buildHttpQuery(
-            'd',
+            UpcHttpRequestMode::HTTP_REQUEST_MODE_SEND_RECEIVE,
             array(
-                'data' => utf8_encode($upc)
+                UpcHttpRequestParam::HTTP_REQUEST_PARAM_DATA => utf8_encode($upc->getUpc())
             )
         );
 
@@ -90,29 +93,9 @@ class Unionplatform
      */
     public function createRoom($roomId)
     {
-        // build the upc request
-        $upc = $this->upcBuilder->buildUpc(
-            24,
-            array(
-                $roomId
-            )
-        );
-
-        // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery(
-            's',
-            array(
-                'rid' => $this->getRequestNumber(),
-                'sid' => $this->sessionId,
-                'data' => $upc
-            )
-        );
-
-        // send through the http client and
-        // parse the upc if any
-        return $this->upcReader->readUpc(
-            $this->httpClient->send($data)
-        );
+        $upc = new UpcBuilder(UpcMessageId::MESSAGE_ID_CREATE_ROOM);
+        $upc->addArgument($roomId);
+        return $this->sendUpc($upc);
     }
 
     /**
@@ -125,27 +108,9 @@ class Unionplatform
      */
     public function joinRoom($roomId, $password = '')
     {
-        // client handshake
-        $upc = $this->upcBuilder->buildUpc(
-            4,
-            array(
-                $roomId
-            )
-        );
-
-        // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery(
-            's',
-            array(
-                'rid' => $this->getRequestNumber(),
-                'sid' => $this->sessionId,
-                'data' => $upc
-            )
-        );
-
-        return $this->upcReader->readUpc(
-            $this->httpClient->send($data)
-        );
+        $upc = new UpcBuilder(UpcMessageId::MESSAGE_ID_JOIN_ROOM);
+        $upc->addArgument($roomId);
+        return $this->sendUpc($upc);
     }
 
     /**
@@ -154,45 +119,35 @@ class Unionplatform
      *
      * @todo fix the includeSelf param, this causes an exception on the server
      *
-     * @param string $room
+     * @param string $roomId
      * @param string $message
-     * @param int $userId
+     * @param bool $includeSelf
+     * @param array $filters
      * @param array $params
      * @return array
-     * @throws PhpunionplatformException
+     * @internal param int $userId
      */
-    public function sendMessage($room, $message, $userId, array $params = array())
-    {
-        $filter = '';
+    public function sendMessage(
+        $roomId,
+        $message,
+        $includeSelf = false,
+        array $filters = array(),
+        array $params = array()
+    ) {
+        $upc = new UpcBuilder(UpcMessageId::MESSAGE_ID_SEND_MESSAGE_TO_ROOMS);
 
-        if (!empty($userId)) {
-            // prepare the filter
-            $xml = '<f t="A"><a c="eq"><n><![CDATA[userId]]></n><v><![CDATA[' . $userId . ']]></v></a></f>';
-            $filter = simplexml_load_string($xml);
+        $upc->addArgument($message);
+        $upc->addArgument($roomId);
+        $upc->addArgument(($includeSelf) ? 'true' : 'false');
+        $upc->addFilters($filters);
+
+        if (count($params) > 0) {
+            foreach ($params as $param) {
+                $upc->addArgument($param);
+            }
         }
 
-        // set the upc param
-        $upcParams = array($message, $room, '0', '0', $filter);
-
-        // add any additional params
-        $upcParams = array_merge($upcParams, $params);
-
-        // build upc
-        $upc = $this->upcBuilder->buildUpc(1, $upcParams);
-
-        // create a postfield query string
-        $data = $this->querybuilder->buildHttpQuery(
-            's',
-            array(
-                'rid' => $this->getRequestNumber(),
-                'sid' => $this->sessionId,
-                'data' => $upc
-            )
-        );
-
-        return $this->upcReader->readUpc(
-            $this->httpClient->send($data)
-        );
+        return $this->sendUpc($upc);
     }
 
     /**
@@ -230,5 +185,21 @@ class Unionplatform
     {
         $this->requestNumber += 1;
         return $this->requestNumber;
+    }
+
+    private function sendUpc(UpcBuilder $upc)
+    {
+        $data = $this->querybuilder->buildHttpQuery(
+            UpcHttpRequestMode::HTTP_REQUEST_MODE_SEND,
+            array(
+                UpcHttpRequestParam::HTTP_REQUEST_PARAM_REQUEST_ID   => $this->getRequestNumber(),
+                UpcHttpRequestParam::HTTP_REQUEST_PARAM_SESSION_ID   => $this->sessionId,
+                UpcHttpRequestParam::HTTP_REQUEST_PARAM_DATA         => $upc->getUpc()
+            )
+        );
+
+        return $this->upcReader->readUpc(
+            $this->httpClient->send($data)
+        );
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace phpunionplatform\Library\client;
+namespace phpunionplatform\Library\Client;
 
-use phpunionplatform\exception\PhpunionplatformException;
+use phpunionplatform\Exception\PhpunionplatformException;
 
 class HttpClient implements HttpClientInterface
 {
@@ -41,7 +41,7 @@ class HttpClient implements HttpClientInterface
      */
     public function send($data)
     {
-        $socket = stream_socket_client("tcp://".$this->host.":" . $this->port, $errno, $errstr, 15);
+        $socket = stream_socket_client("tcp://".$this->host.":" . $this->port, $errno, $errstr, 5);
 
         if (!$socket) {
             throw new PhpunionplatformException('Socket connection failed');

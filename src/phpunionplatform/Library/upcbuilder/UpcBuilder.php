@@ -1,48 +1,132 @@
 <?php
 
-namespace phpunionplatform\Library\upcbuilder;
+namespace phpunionplatform\Library\Upcbuilder;
+
+use phpunionplatform\Library\Enum\UpcFilterNodeAttribute;
+use phpunionplatform\Library\Enum\UpcNodeType;
 
 class UpcBuilder
 {
-    public function __construct()
+    /**
+     * @var \DOMDocument
+     */
+    private $upc;
+
+    /**
+     * UpcBuilder constructor.
+     * @param string $messageId
+     */
+    public function __construct(string $messageId)
     {
+        $this->upc = new \DOMDocument('1.0', 'utf-8');
+
+        $root = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_UPC);
+        $this->upc->appendChild($root);
+
+        $message = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_MESSAGE, $messageId);
+        $root->appendChild($message);
+
+        $list = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_LIST);
+        $root->appendChild($list);
     }
 
     /**
-     * @param $upcCode
-     * @param array $arguments
-     * @return mixed
+     * @param $value
      */
-    public function buildUpc($upcCode, array $arguments)
+    public function addArgument($value)
     {
-        $xml = new \SimpleXMLElement('<root/>');
-
-        $unionDoc = $xml->addChild('U');
-
-        // add the upc code
-        $unionDoc->addChild('M', 'u' . $upcCode);
-
-        // create the argument list
-        $list = $unionDoc->addChild('L');
-
-        if (!empty($arguments)) {
-            foreach ($arguments as $argument) {
-                if (gettype($argument) === 'object') {
-                    $la = $list->addChild('A');
-                    $this->sxmlAppend($la, $argument);
-                } else {
-                    $list->addChild('A', $argument);
-                }
-            }
-        }
-
-        return $unionDoc->asXML();
+        $list = $this->getUpcList();
+        $argument = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_ARGUMENT, $value);
+        $list->appendChild($argument);
     }
 
-    private function sxmlAppend(\SimpleXMLElement $to, \SimpleXMLElement $from)
+    /**
+     * @param array $filters
+     */
+    public function addFilters(array $filters)
     {
-        $toDom = dom_import_simplexml($to);
-        $fromDom = dom_import_simplexml($from);
-        $toDom->appendChild($toDom->ownerDocument->importNode($fromDom, true));
+        $list = $this->getUpcList();
+        $argument = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_ARGUMENT);
+        $list->appendChild($argument);
+
+        $filterNode = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_FILTER);
+        $filterNode->setAttribute(
+            UpcFilterNodeAttribute::UPC_FILTER_NODE_ATTR_TYPE,
+            UpcNodeType::UPC_NODE_TYPE_ARGUMENT
+        );
+
+        $argument->appendChild($filterNode);
+
+        if (count($filters) > 0) {
+            foreach ($filters as $filter) {
+                $this->addFilter($filterNode, $filter['compare'], $filter['name'], $filter['value']);
+            }
+        }
+    }
+
+    /**
+     * @param \DOMElement $filterNode
+     * @param string $compare
+     * @param string $name
+     * @param string $value
+     */
+    public function addFilter(\DOMElement $filterNode, string  $compare, string $name, string $value)
+    {
+        $filterArgument = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_FILTER_ARGUMENT);
+        $filterArgument->setAttribute(UpcFilterNodeAttribute::UPC_FILTER_NODE_ATTR_COMPARE, $compare);
+        $filterNode->appendChild($filterArgument);
+
+        $filterName     = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_FILTER_NAME);
+        $cDataName      = $this->upc->createCDATASection($name);
+        $filterName->appendChild($cDataName);
+
+        $filterValue    = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_FILTER_VALUE);
+        $cDataValue     = $this->upc->createCDATASection($value);
+        $filterValue->appendChild($cDataValue);
+
+        $filterArgument->appendChild($filterName);
+        $filterArgument->appendChild($filterValue);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpc() : String
+    {
+        return $this->upc->saveXML($this->getUpcRoot(), LIBXML_NOXMLDECL);
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    private function getUpcList() : \DOMElement
+    {
+        $nodes = $this->upc->getElementsByTagName(UpcNodeType::UPC_NODE_TYPE_LIST);
+
+        if (!isset($nodes[0])) {
+            throw new \Exception('List node not found');
+        }
+
+        if (count($nodes) > 1) {
+            throw new \Exception('There should be only one list node');
+        }
+
+        return $nodes[0];
+    }
+
+    private function getUpcRoot() : \DOMElement
+    {
+        $nodes = $this->upc->getElementsByTagName(UpcNodeType::UPC_NODE_TYPE_UPC);
+
+        if (!isset($nodes[0])) {
+            throw new \Exception('Root node not found');
+        }
+
+        if (count($nodes) > 1) {
+            throw new \Exception('There should be only one root node');
+        }
+
+        return $nodes[0];
     }
 }
