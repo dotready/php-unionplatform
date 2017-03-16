@@ -36,8 +36,9 @@ class UpcBuilder
     public function addArgument($value)
     {
         $list = $this->getUpcList();
-        $argument = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_ARGUMENT, $value);
-        $list->appendChild($argument);
+        $argument = $this->upc->createElement(UpcNodeType::UPC_NODE_TYPE_ARGUMENT);
+        $node = $list->appendChild($argument);
+        $node->appendChild($this->upc->createCDATASection($value));
     }
 
     /**
