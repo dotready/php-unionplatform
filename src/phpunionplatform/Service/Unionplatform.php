@@ -62,9 +62,15 @@ class Unionplatform
             )
         );
 
+        try {
+            $upc = $this->httpClient->send($data);
+        } catch (\Exception $e) {
+            return false;
+        }
+
         // send through http client
         $srvUpc = $this->upcReader->readUpc(
-            $this->httpClient->send($data)
+            $upc
         );
 
         // if we don't get back the u66 there is a problem
@@ -198,8 +204,14 @@ class Unionplatform
             )
         );
 
+        try {
+            $upc = $this->httpClient->send($data);
+        } catch (PhpunionplatformException $e) {
+            return false;
+        }
+
         return $this->upcReader->readUpc(
-            $this->httpClient->send($data)
+            $upc
         );
     }
 }

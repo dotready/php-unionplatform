@@ -22,6 +22,11 @@ class HttpsClient implements HttpClientInterface
     private $domain;
 
     /**
+     * @var int
+     */
+    private $timeout = 5;
+
+    /**
      * HttpsClient constructor.
      * @param $host
      * @param $port
@@ -37,19 +42,32 @@ class HttpsClient implements HttpClientInterface
     /**
      * @param $data
      * @return mixed
+     *
      * @throws PhpunionplatformException
      */
     public function send($data)
     {
-        $socket = stream_socket_client("tcp://".$this->host.":" . $this->port, $errno, $errstr, 15);
+        $socket = @stream_socket_client(
+            "tcp://" . $this->host . ":" . $this->port,
+            $errorNr,
+            $errorStr,
+            $this->timeout,
+            STREAM_CLIENT_CONNECT
+        );
 
         if (empty($socket)) {
             throw new PhpunionplatformException('Connection timeout');
         }
 
+        stream_set_timeout($socket, $this->timeout);
+
         stream_set_blocking($socket, true);
-        stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+        $success = stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         stream_set_blocking($socket, false);
+
+        if ($success === false) {
+            throw new PhpunionplatformException('SSL negotiation failed');
+        }
 
         if (!$socket) {
             throw new PhpunionplatformException('Socket connection failed');
