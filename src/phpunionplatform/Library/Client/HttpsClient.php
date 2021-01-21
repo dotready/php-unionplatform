@@ -47,12 +47,21 @@ class HttpsClient implements HttpClientInterface
      */
     public function send($data)
     {
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ]);
+
         $socket = @stream_socket_client(
             "tcp://" . $this->host . ":" . $this->port,
             $errorNr,
             $errorStr,
             $this->timeout,
-            STREAM_CLIENT_CONNECT
+            STREAM_CLIENT_CONNECT,
+            $context
         );
 
         if (empty($socket)) {
